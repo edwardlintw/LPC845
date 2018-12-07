@@ -14,10 +14,15 @@
 
 typedef struct joystick_struct {
     uint32_t    channel_;
+    uint32_t	old_value_;
 }   joystick_struct_t;
 
 static joystick_struct_t    joysticks[] = {
-    { .channel_ = 0 }
+#if 1
+	{ .channel_ = 9, .old_value_ = 0 }
+#else
+    { .channel_ = 0, .old_value_ = 0 }
+#endif
 };
 
 uint32_t init_joysticks(void)
@@ -88,9 +93,15 @@ joystick_value_t* joystick_task(void)
 	for (size_t i = 0; i < sizeof joysticks / sizeof joysticks[0]; ++i) {
         //while (!ADC_GetChannelConversionResult(ADC_BASE, joysticks[i].channel_, &adcResultInfoStruct))
         //	;
-		value[i].ready_ =
 		ADC_GetChannelConversionResult(ADC_BASE, joysticks[i].channel_, &adcResultInfoStruct);
-		value[i].value_ = adcResultInfoStruct.result;
+		uint32_t v = adcResultInfoStruct.result;
+		if (v > joysticks[i].old_value_ + 5 || v < joysticks[i].old_value_ - 5) {
+			value[i].value_ = v;
+			value[i].ready_ = true;
+			joysticks[i].old_value_ = v;
+		}
+		else
+			value[i].ready_ = false;
 	}
 	return value;
 }

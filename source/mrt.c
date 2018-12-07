@@ -118,20 +118,14 @@ void MRT0_IRQHandler(void)
     // ADC
     // joysticks
     joystick_value_t* value = joystick_task();
-    static uint32_t   old_value = 0;
-    static uint32_t	  t = 0;
-    uint32_t		  v;
     for (uint32_t i = 0; i < joysticks_num; ++i) {
 #if 0
     	++t;
     	if (t % 1000 == 0)
     		PRINTF("\r\nvalue: %u", value[i].value_);
 #else
-    	v = value[i].value_;
-    	if (v != old_value && ((v > old_value + 5) || (v < old_value - 5))) {
-    		old_value = v;
-    		PRINTF("\r\njoystick value: %u", v);
-    	}
+    	if (value[i].ready_)
+    		PRINTF("\r\njoystick value: %u", value[i].value_);
 #endif
     }
 #endif

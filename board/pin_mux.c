@@ -128,7 +128,6 @@ void BOARD_InitPins(void)
     /* PORT4 PIN4 (coords: ) is configured as  */
     IOCON_PinMuxSet(IOCON, 44, pio44_config);
 
-#if 1
     // ADC
     const uint32_t pio45_config = (/* Selects pull-up function */
                                    IOCON_PIO_MODE_PULLUP |
@@ -143,6 +142,9 @@ void BOARD_InitPins(void)
                                    /* IOCONCLKDIV0 */
                                    IOCON_PIO_CLKDIV0);
     /* PORT4 PIN5 (coords: ) is configured as  */
+#if 1
+    IOCON_PinMuxSet(IOCON, 63, pio45_config);	// PIO0_17, pin 63, ADC channel 9
+#else
     IOCON_PinMuxSet(IOCON, 45, pio45_config);
 #endif
 
@@ -154,8 +156,11 @@ void BOARD_InitPins(void)
 
 #if 1
     // ADC
+    /* ADC_CHN9 connect to P0_17 */
+    SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN9, true);	// fsl_swm_connections.h
+#else
     /* ADC_CHN0 connect to P0_7 */
-    SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN0, true);
+    SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN0, true);	// fsl_swm_connections.h
 #endif
 
     /* Disable clock for switch matrix. */
