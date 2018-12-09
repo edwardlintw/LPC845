@@ -45,7 +45,6 @@
 #include "button-hal.h"
 #include "joystick-hal.h"
 #include "time_tick.h"
-#include "test_gpio_high_low.h"
 
 /*******************************************************************************
  * Definitions
