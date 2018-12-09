@@ -9,9 +9,10 @@ typedef struct joystick_hal_struct {
 
 typedef struct joystick_value_t {
     uint32_t        value_;
+    bool			ready_;
 }	joystick_value_t;
 
-void              joystick_init(joystick_hal_struct_t*, uint32_t delta);
+size_t            joystick_init(void);
 joystick_value_t* joystick_task(void);
 
 

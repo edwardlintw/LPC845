@@ -38,15 +38,12 @@
 #include "fsl_adc.h"
 #include "fsl_clock.h"
 #include "fsl_power.h"
-
-#if 1
 #include "fsl_gpio.h"
-#endif
 
 #include "pin_mux.h"
-#include "encoder.h"
-#include "button.h"
-#include "joystick.h"
+#include "encoder-hal.h"
+#include "button-hal.h"
+#include "joystick-hal.h"
 #include "time_tick.h"
 #include "test_gpio_high_low.h"
 
@@ -57,7 +54,6 @@
 #define APP_LED_ON (LED_RED_ON())
 #define APP_LED_TOGGLE (LED_RED_TOGGLE())
 #define MRT_CLK_FREQ CLOCK_GetFreq(kCLOCK_CoreSysClk)
-#define ADC_CLOCK_SOURCE kCLOCK_Fro
 
 /*******************************************************************************
  * Prototypes
@@ -66,18 +62,10 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-
-#if 1
-
 static volatile uint32_t mrtIsrCount = 0;
 static uint32_t			 encoders_num = 0;
 static uint32_t			 buttons_num = 0;
 static uint32_t			 joysticks_num = 0;
-#else
-
-static volatile bool mrtIsrFlag = false;
-
-#endif
 
 /*******************************************************************************
  * Code
@@ -86,19 +74,18 @@ void MRT0_IRQHandler(void)
 {
     /* Clear interrupt flag.*/
     MRT_ClearStatusFlags(MRT0, kMRT_Channel_0, kMRT_TimerInterruptFlag);
-#if 1
     inc_time_tick_ms();
     ++mrtIsrCount;
 
-#if 1
+#if 0
     // encoders
     encoder_state_t*	encoder_state = encoder_task();
     for (uint32_t i = 0; i < encoders_num; ++i) {
         if (encoder_state[i].result_ != encoder_result_none) {
         	if (encoder_state[i].result_ == encoder_result_turn_left)
-        		PRINTF("\r\nencoder %u turn left", encoder_state[i].encoder_id_);
+        		PRINTF("\r\nencoder %u turn left", encoder_state[i].id_);
         	else
-        		PRINTF("\r\nencoder %u turn right", encoder_state[i].encoder_id_);
+        		PRINTF("\r\nencoder %u turn right", encoder_state[i].id_);
         }
     }
 
@@ -114,27 +101,13 @@ void MRT0_IRQHandler(void)
     }
 #endif
 
-#if 1
-    // ADC
     // joysticks
     joystick_value_t* value = joystick_task();
     for (uint32_t i = 0; i < joysticks_num; ++i) {
-#if 0
-    	++t;
-    	if (t % 1000 == 0)
-    		PRINTF("\r\nvalue: %u", value[i].value_);
-#else
     	if (value[i].ready_)
     		PRINTF("\r\njoystick value: %u", value[i].value_);
-#endif
     }
-#endif
 
-    // test GPIO, visit test_gpio_higi_low.c/test_gpio_high_low.h for detail info for controlling GPIO higi/low
-    //test_gpio_task();
-#else
-    mrtIsrFlag = true;
-#endif
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
       exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -154,38 +127,11 @@ int main(void)
 
     /* Board pin, clock, debug console init */
     /* Attach main clock to USART0 (debug console) */
-#if 1
-    // ADC code
     CLOCK_Select(BOARD_DEBUG_USART_CLK_ATTACH);
-#else
-    // MRT code
-    CLOCK_Select(kUART0_Clk_From_MainClk);
-#endif
 
     BOARD_InitPins();
     BOARD_BootClockFRO30M();
     BOARD_InitDebugConsole();
-
-    // ADC code
-    CLOCK_Select(kADC_Clk_From_Fro);
-    CLOCK_SetClkDivider(kCLOCK_DivAdcClk, 1U);
-    POWER_DisablePD(kPDRUNCFG_PD_ADC0);
-
-#if 1
-    uint32_t    freq;
-    freq = CLOCK_GetFreq(ADC_CLOCK_SOURCE) / CLOCK_GetClkDivider(kCLOCK_DivAdcClk);
-    if (ADC_DoSelfCalibration(ADC0, freq))
-    {
-        PRINTF("ADC_DoSelfCalibration() Done.\r\n");
-    }
-    else
-    {
-        PRINTF("ADC_DoSelfCalibration() Failed.\r\n");
-    }
-#endif
-
-    /* Initialize and enable LED */
-    APP_LED_INIT;
 
     mrt_clock = MRT_CLK_FREQ;
 
@@ -201,21 +147,9 @@ int main(void)
     /* Enable timer interrupts for channel 0 */
     MRT_EnableInterrupts(MRT0, kMRT_Channel_0, kMRT_TimerInterruptEnable);
 
-
-#if 1
-    GPIO_PortInit(GPIO, 0);
-    GPIO_PortInit(GPIO, 1);
-#if 1
-    encoders_num = init_encoders();
-    buttons_num  = init_buttons();
-#endif
-#if 1
-    // ADC
-    joysticks_num = init_joysticks();
-    PRINTF("\r\ninit ADC done");
-#endif
-    //init_gpio_test();
-#endif
+    joysticks_num = joystick_init();
+    encoders_num  = encoder_init();
+    buttons_num   = button_init();
 
     /* Enable at the NVIC */
     EnableIRQ(MRT0_IRQn);
@@ -227,13 +161,10 @@ int main(void)
     while (true)
     {
         /* Check whether occur interupt and toggle LED */
-    	/*
     	if (mrtIsrCount == 5000)
     	{
-            PRINTF("\r\n 5000 interrupts, toggle LED");
-            //APP_LED_TOGGLE;
+            PRINTF("\r\n 5000 interrupts");
             mrtIsrCount = 0;
     	}
-    	*/
     }
 }

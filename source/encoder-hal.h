@@ -22,7 +22,7 @@ typedef struct encoder_hal_struct {
     uint32_t            pinB_;
 }   encoder_hal_struct_t;
 
-void             encoder_init(encoder_hal_struct_t* encoders, size_t num);
+uint32_t         encoder_init(void);
 encoder_state_t* encoder_task(void);
 
 #endif

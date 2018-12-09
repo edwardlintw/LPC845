@@ -128,6 +128,7 @@ void BOARD_InitPins(void)
     /* PORT4 PIN4 (coords: ) is configured as  */
     IOCON_PinMuxSet(IOCON, 44, pio44_config);
 
+#if 0
     // ADC
     const uint32_t pio45_config = (/* Selects pull-up function */
                                    IOCON_PIO_MODE_PULLUP |
@@ -142,6 +143,7 @@ void BOARD_InitPins(void)
                                    /* IOCONCLKDIV0 */
                                    IOCON_PIO_CLKDIV0);
     /* PORT4 PIN5 (coords: ) is configured as  */
+#endif
 
 #if 0
   #if 1

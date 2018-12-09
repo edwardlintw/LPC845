@@ -5,8 +5,8 @@
  *      Author: Edward
  */
 
-#ifndef BUTTON_H_
-#define BUTTON_H_
+#ifndef BUTTON_HAL_H_
+#define BUTTON_HAL_H_
 
 typedef enum button_result {
 	button_result_none,
@@ -20,7 +20,7 @@ typedef struct button_state {
 	uint32_t		pushed_time_ms_;
 }	button_state_t;
 
-uint32_t 			init_buttons(void);
+size_t  			button_init(void);
 button_state_t* 	button_task(void);
 
-#endif /* BUTTON_H_ */
+#endif /* BUTTON_HAL_H_ */

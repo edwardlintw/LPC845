@@ -4,20 +4,40 @@
 #include "pin_mux.h"
 #include "fsl_swm_connections.h"
 #include "fsl_adc.h"
+#include "fsl_clock.h"
+#include "fsl_power.h"
+#include "fsl_mrt.h"
+
+#include "fsl_iocon.h"
 #include "adc-driver.h"
 
 static bool 				adc_did_init_ = false;
 
-#define ADC_BASE    ADC0
+#define ADC_BASE    		ADC0
+#define ADC_CLOCK_SOURCE 	kCLOCK_Fro
+
 
 static void adc_pin_config(uint32_t pin);
 
 void adc_init(adc_sample_bit_t sample_bit)
 {
 	if (!adc_did_init_) {
-#if 0
-		adc_pin_config(pin);
-#endif
+	    // ADC code
+	    CLOCK_Select(kADC_Clk_From_Fro);
+	    CLOCK_SetClkDivider(kCLOCK_DivAdcClk, 1U);
+	    POWER_DisablePD(kPDRUNCFG_PD_ADC0);
+
+	    uint32_t    freq;
+	    freq = CLOCK_GetFreq(ADC_CLOCK_SOURCE) / CLOCK_GetClkDivider(kCLOCK_DivAdcClk);
+	    if (ADC_DoSelfCalibration(ADC0, freq))
+	    {
+	        PRINTF("ADC_DoSelfCalibration() Done.\r\n");
+	    }
+	    else
+	    {
+	        PRINTF("ADC_DoSelfCalibration() Failed.\r\n");
+	    }
+
 	    adc_config_t  adcConfigStruct;
 
 #if defined(FSL_FEATURE_ADC_HAS_CTRL_RESOL) & FSL_FEATURE_ADC_HAS_CTRL_RESOL
@@ -65,12 +85,16 @@ void adc_channels_init(adc_channel_t* channel, size_t n)
 	/*
 	 * ADC channel to LPC845 pin map
 	 * channel 0 - 11
+	 * https://www.nxp.com/docs/en/data-sheet/LPC84x.pdf
 	 */
 	static uint32_t chn_pin[] = {
 			45, 46, 49, 51, 55, 57,
 			58, 60, 61, 63, 2 , 6
 	};
 
+	/*
+	 * fsl_swm_connections.h
+	 */
 	static swm_select_fixed_pin_t chn_config[] = {
 			kSWM_ADC_CHN0,
 			kSWM_ADC_CHN1,
@@ -131,6 +155,9 @@ void adc_read(adc_channel_t* channel, adc_value_t* value, size_t n)
 
 static void adc_pin_config(uint32_t pin)
 {
+	/*
+	 * fsl_iocon.h
+	 */
     const uint32_t pin_config = (/* Selects pull-up function */
                                    IOCON_PIO_MODE_PULLUP |
                                    /* Enable hysteresis */

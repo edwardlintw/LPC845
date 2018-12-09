@@ -11,8 +11,9 @@
 #include "fsl_mrt.h"
 #include "fsl_gpio.h"
 #include "pin_mux.h"
-#include "button.h"
 #include "time_tick.h"
+#include "button-hal.h"
+#include "gpio-driver.h"
 
 typedef struct button_struct {
 	uint32_t	pin_;
@@ -21,20 +22,21 @@ typedef struct button_struct {
 }	button_struct_t;
 
 static button_struct_t	buttons[] = {
-		{
-			.pin_ 		= P1_19,
-			.pin_value_ = 1
-		}
+	{
+		.pin_ 		= P1_19,
+		.pin_value_ = 1
+	}
 };
 
-uint32_t init_buttons(void)
+size_t button_init(void)
 {
-    gpio_pin_config_t pinConfig = {
-        kGPIO_DigitalInput, 0,
-    };
+    gpio_init_struct_t gpio;
 
-	for (uint32_t i = 0; i < sizeof buttons / sizeof buttons[0]; ++i) {
-	    GPIO_PinInit(GPIO, PIO_PORT(buttons[i].pin_), PIO_PIN(buttons[i].pin_), &pinConfig);
+	for (size_t i = 0; i < sizeof buttons / sizeof buttons[0]; ++i) {
+		gpio.pin_ = buttons[i].pin_;
+		gpio.direction_ = gpio_direction_input;
+		gpio.output_logic_ = 0;
+		gpio_init(&gpio);
 	}
 
 	return sizeof buttons / sizeof buttons[0];
@@ -48,7 +50,7 @@ button_state_t* button_task(void)
 	for (uint32_t i = 0; i < sizeof buttons / sizeof buttons[0]; ++i) {
 		state[i].result_ = button_result_none;
 		state[i].button_id_ = i;
-		value = GPIO_PinRead(GPIO, PIO_PORT(buttons[i].pin_), PIO_PIN(buttons[i].pin_));
+		gpio_read(buttons[i].pin_);
 		if (value == buttons[i].pin_value_)
 			continue;
 		if (0 == value) {

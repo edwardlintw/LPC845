@@ -26,32 +26,46 @@ typedef struct encoder_data {
 static void determine_state(uint32_t, uint32_t, encoder_data_t*, encoder_state_t*);
 static void reset_encoder(encoder_data_t*);
 
-static encoder_hal_struct_t*    encoders_ = NULL;
-static encoder_data_t*          enc_data_ = NULL;
-static encoder_state_t*         enc_state_ = NULL;
-static size_t                   enc_num_ = 0;
+static encoder_hal_struct_t    encoders_[] = {
+	{
+		.id_ 	= 0,
+		.pinA_  = P0_6,
+		.pinB_  = P1_7
+	}
+};
+static encoder_data_t         enc_data_[] = {
+	{
+			.valueA_		= 1,
+			.valueB_		= 1,
+			.expected_path_ = -1,
+			.current_step_  = -1
+	}
+};
+static encoder_state_t         enc_state_[] = {
+	{
+			.id_		= 0,
+			.result_	= encoder_result_none
+	}
+};
+static size_t                  enc_num_ = sizeof encoders_ / sizeof encoders_[0];
 
-void encoder_init(encoder_hal_struct_t* encoders, size_t num)
+size_t encoder_init(void)
 {
-    encoders_ = encoders;
-    enc_num_ = num;
-    enc_data_ = (encoder_data_t*) malloc(sizeof(encoder_data_t) * num);
-    enc_state_ = (encoder_state_t*) malloc(sizeof(encoder_state_t) * num);
     gpio_init_struct_t gpio;
-    for (size_t i = 0; i < num; ++i) {
-       gpio.pin_ = encoders[i].pinA_;
+    for (size_t i = 0; i < enc_num_; ++i) {
+       gpio.pin_ = encoders_[i].pinA_;
        gpio.direction_ = gpio_direction_input;
        gpio.output_logic_ = 0;
        gpio_init(&gpio);
 
-       gpio.pin_ = encoders[i].pinB_;
+       gpio.pin_ = encoders_[i].pinB_;
        gpio.direction_ = gpio_direction_input;
        gpio.output_logic_ = 0;
        gpio_init(&gpio);
 
        reset_encoder(&enc_data_[i]);
     }
-
+    return enc_num_;
 }
 
 encoder_state_t* encoder_task(void)
