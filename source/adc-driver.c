@@ -2,13 +2,14 @@
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "pin_mux.h"
-#include "fsl_swm_connections.h"
 #include "fsl_adc.h"
 #include "fsl_clock.h"
 #include "fsl_power.h"
 #include "fsl_mrt.h"
-
+#include "fsl_common.h"
 #include "fsl_iocon.h"
+#include "fsl_swm.h"
+#include "fsl_swm_connections.h"
 #include "adc-driver.h"
 
 static bool 				adc_did_init_ = false;

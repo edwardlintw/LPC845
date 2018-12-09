@@ -28,5 +28,5 @@ uint32_t gpio_read (uint32_t pin)
 
 void gpio_write(uint32_t pin, uint32_t value)
 {
-	GPIO_PinWrite(GPIO, PIO_PORT(pin), PIO_pin(pin), value);
+	GPIO_PinWrite(GPIO, PIO_PORT(pin), PIO_PIN(pin), value);
 }
