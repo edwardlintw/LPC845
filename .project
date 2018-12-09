@@ -24,11 +24,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>doc/readme.txt</name>
-			<type>1</type>
-			<locationURI>SDK_2_x_LPC845/boards/lpcxpresso845max/driver_examples/mrt/readme.txt</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

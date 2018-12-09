@@ -14,7 +14,7 @@ typedef enum encoder_result {
 typedef struct encoder_state {
     int32_t             id_;
     encoder_result_t    result_;
-}   encder_state_t;
+}   encoder_state_t;
 
 typedef struct encoder_hal_struct {
     int32_t             id_;
@@ -22,7 +22,7 @@ typedef struct encoder_hal_struct {
     uint32_t            pinB_;
 }   encoder_hal_struct_t;
 
-void            init_encoder(const encoder_hal_struct_t* encoders, size_t num);
+void             encoder_init(encoder_hal_struct_t* encoders, size_t num);
 encoder_state_t* encoder_task(void);
 
 #endif

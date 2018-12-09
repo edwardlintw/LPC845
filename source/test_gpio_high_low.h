@@ -8,7 +8,7 @@
 #ifndef TEST_GPIO_HIGH_LOW_H_
 #define TEST_GPIO_HIGH_LOW_H_
 
-#include "gpio_def.h"
+#include <gpio-def.h>
 
 #define TEST_OUT_PIN	P1_18
 #define TEST_IN_PIN		P1_14

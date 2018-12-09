@@ -4,12 +4,12 @@
  *  Created on: Nov 12, 2018
  *      Author: Edward
  */
+#include <gpio-def.h>
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_mrt.h"
 #include "fsl_gpio.h"
 #include "pin_mux.h"
-#include "gpio_def.h"
 #include "test_gpio_high_low.h"
 
 void init_gpio_test(void)

@@ -5,12 +5,12 @@
  *      Author: Edward
  */
 
+#include <gpio-def.h>
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_mrt.h"
 #include "fsl_gpio.h"
 #include "pin_mux.h"
-#include "gpio_def.h"
 #include "encoder.h"
 
 typedef enum encoder_event {

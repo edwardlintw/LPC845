@@ -1,12 +1,12 @@
 /*
  * encoder-hal.c
  */
+#include <gpio-def.h>
 #include <stdlib.h>
 #include "fsl_debug_console.h"
 #include "board.h"
-#include "gpio_def.h"
-#include "gpio-driver.h"
 #include "encoder-hal.h"
+#include "gpio-driver.h"
 
 typedef enum encoder_event {
     encoder_event_pinA_up,
@@ -16,13 +16,6 @@ typedef enum encoder_event {
     encoder_event_max
 }   encoder_event_t;
 
-static encoder_event_t expected_event[2][encoder_event_max-1] = {
-    // when pin A is down first
-    { encoder_event_pinB_down, encoder_event_pinA_up, encoder_event_pinB_up },
-    // when pin B is down first
-    { encoder_event_pinA_down, encoder_event_pinB_up, encoder_event_pinA_up }
-};
-
 typedef struct encoder_data {
     uint32_t    valueA_;
     uint32_t    valueB_;
@@ -30,36 +23,33 @@ typedef struct encoder_data {
     int32_t     current_step_;
 }   encoder_data_t;
 
-void determine_state(uint32_t, uint32_t, encoder_data_t*, encoder_state_t*);
-void reset_encoder(encoder_struct_t*);
+static void determine_state(uint32_t, uint32_t, encoder_data_t*, encoder_state_t*);
+static void reset_encoder(encoder_data_t*);
 
 static encoder_hal_struct_t*    encoders_ = NULL;
-static encoder_data_t*          enc_data = NULL;
-static encoder_state_t*         enc_state = NULL;
+static encoder_data_t*          enc_data_ = NULL;
+static encoder_state_t*         enc_state_ = NULL;
 static size_t                   enc_num_ = 0;
 
-void init_encoder(const encoder_hal_struct_t* encoders, size_t num)
+void encoder_init(encoder_hal_struct_t* encoders, size_t num)
 {
     encoders_ = encoders;
     enc_num_ = num;
-    enc_data = (encoder_data_t*) malloc(sizeof(encoder_data_t) * num);
-    enc_state = (encoder_state_t*) malloc(sizeof(encoder_state_t) * num);
-    gpio_driver_struct_t gpio;
+    enc_data_ = (encoder_data_t*) malloc(sizeof(encoder_data_t) * num);
+    enc_state_ = (encoder_state_t*) malloc(sizeof(encoder_state_t) * num);
+    gpio_init_struct_t gpio;
     for (size_t i = 0; i < num; ++i) {
-       gpio.pio_pin_ = encoders[i].pinA_;
-       gpio.pio_direction_ = kGPIO_DigitalInput;
-       gpio.outout_logic_ = 0;
-       init_gpio(&gpio);
+       gpio.pin_ = encoders[i].pinA_;
+       gpio.direction_ = gpio_direction_input;
+       gpio.output_logic_ = 0;
+       gpio_init(&gpio);
 
-       gpio.pio_pin_ = encoders[i].pinB_;
-       gpio.pio_direction_ = kGPIO_DigitalInput;
-       gpio.outout_logic_ = 0;
-       init_gpio(&gpio);
+       gpio.pin_ = encoders[i].pinB_;
+       gpio.direction_ = gpio_direction_input;
+       gpio.output_logic_ = 0;
+       gpio_init(&gpio);
 
-       enc_data[i].valueA_        = 1;
-       enc_data[i].valueB_        = 1;
-       enc_data[i].expected_path_ = -1;
-       enc_data[i].current_step_  = -1;
+       reset_encoder(&enc_data_[i]);
     }
 
 }
@@ -69,39 +59,46 @@ encoder_state_t* encoder_task(void)
     volatile uint32_t   valueA;
     volatile uint32_t   valueB;
 
-    for (size_t i = 0; i < encoders_num_; ++i) {
-        enc_state[i].result_ = encoder_result_none;
-        enc_state[i].id_     = i;
-        valueA = gpio_read(encoders[i].pinA_);
-        valueB = gpio_read(encoders[i].pinB_);
-        determine_state(valueA, valueB, &encoders[i], &enc_state[i]);
+    for (size_t i = 0; i < enc_num_; ++i) {
+        enc_state_[i].result_ = encoder_result_none;
+        enc_state_[i].id_     = i;
+        valueA = gpio_read(encoders_[i].pinA_);
+        valueB = gpio_read(encoders_[i].pinB_);
+        determine_state(valueA, valueB, &enc_data_[i], &enc_state_[i]);
     }
 
-    return enc_state;
+    return enc_state_;
 }
 
-void reset_encoder(encoder_struct_t* s)
+static void reset_encoder(encoder_data_t* s)
 {
     s->valueA_ = 1;
     s->valueB_ = 1;
     s->expected_path_ = -1;
-    s->expected_path_ = -1;
+    s->current_step_ = -1;
 }
 
-void determine_state
+static void determine_state
     (
-        uint32_t            valueA_, 
-        uint32_t            valueB_, 
+        uint32_t            valueA,
+        uint32_t            valueB,
         encoder_data_t*     enc_data, 
         encoder_state_t*    enc_state
     )
 {
+	static encoder_event_t expected_event[2][encoder_event_max-1] = {
+	    // when pin A is down first
+	    { encoder_event_pinB_down, encoder_event_pinA_up, encoder_event_pinB_up },
+	    // when pin B is down first
+	    { encoder_event_pinA_down, encoder_event_pinB_up, encoder_event_pinA_up }
+	};
+
     bool did_reset_encoder = false;
 
     if (valueA != enc_data->valueA_ || valueB != enc_data->valueB_) {
         bool a_value_changed = valueA != enc_data->valueA_;
         if (-1 == enc_data->expected_path_ && -1 == enc_data->current_step_) {
-            enc_data->expected_path = a_value_changed ? 0 : 1;
+            enc_data->expected_path_ = a_value_changed ? 0 : 1;
             enc_data->current_step_ = 0;
         }
         else {
@@ -116,13 +113,13 @@ void determine_state
                 if (++enc_data->current_step_ == encoder_event_max - 2) {
                     enc_state->result_ = 0 == enc_data->expected_path_ ? encoder_result_turn_left
                                                                        : encoder_result_turn_right;
-                    reset_encoder(encoder);
+                    reset_encoder(enc_data);
                     did_reset_encoder = true;
                 }
             }
             else {
                 // invalid (wrong) encoder pin phase
-                reset_endoder(encoder);
+                reset_encoder(enc_data);
                 did_reset_encoder = true;
             }
         }

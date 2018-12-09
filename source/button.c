@@ -5,12 +5,12 @@
  *      Author: Edward
  */
 
+#include <gpio-def.h>
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_mrt.h"
 #include "fsl_gpio.h"
 #include "pin_mux.h"
-#include "gpio_def.h"
 #include "button.h"
 #include "time_tick.h"
 

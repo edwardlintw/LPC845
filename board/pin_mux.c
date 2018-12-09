@@ -142,10 +142,13 @@ void BOARD_InitPins(void)
                                    /* IOCONCLKDIV0 */
                                    IOCON_PIO_CLKDIV0);
     /* PORT4 PIN5 (coords: ) is configured as  */
-#if 1
+
+#if 0
+  #if 1
     IOCON_PinMuxSet(IOCON, 63, pio45_config);	// PIO0_17, pin 63, ADC channel 9
-#else
+  #else
     IOCON_PinMuxSet(IOCON, 45, pio45_config);
+  #endif
 #endif
 
     /* USART0_TXD connect to P1_17 */
@@ -154,13 +157,15 @@ void BOARD_InitPins(void)
     /* USART0_RXD connect to P1_16 */
     SWM_SetMovablePinSelect(SWM0, kSWM_USART0_RXD, kSWM_PortPin_P1_16);
 
-#if 1
+#if 0
+  #if 1
     // ADC
     /* ADC_CHN9 connect to P0_17 */
     SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN9, true);	// fsl_swm_connections.h
-#else
+  #else
     /* ADC_CHN0 connect to P0_7 */
     SWM_SetFixedPinSelect(SWM0, kSWM_ADC_CHN0, true);	// fsl_swm_connections.h
+  #endif
 #endif
 
     /* Disable clock for switch matrix. */
