@@ -1,6 +1,3 @@
-/*
- * encoder-hal.c
- */
 #include <gpio-def.h>
 #include <stdlib.h>
 #include "fsl_debug_console.h"

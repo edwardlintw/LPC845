@@ -1,7 +1,3 @@
-/*
- * encoder-hal.h
- */
-
 #ifndef ENCODER_HAL_H_
 #define ENCODER_HAL_H_
 

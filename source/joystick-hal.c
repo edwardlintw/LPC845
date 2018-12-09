@@ -1,4 +1,3 @@
-
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
@@ -44,7 +43,7 @@ joystick_value_t* joystick_task(void)
 
 		volatile int32_t	nv = adc_values_[i].value_;
 		volatile int32_t	ov = adc_old_values_[i].value_;
-		if (((nv > ov) && (nv - ov > delta_)) || ((ov > nv) && (ov - nv > delta_))) {
+		if ((nv - ov > delta_) || (ov - nv > delta_)) {
 			adc_old_values_ [i].value_ = nv;
 			joystick_values_[i].value_ = nv;
 			joystick_values_[i].ready_ = true;
