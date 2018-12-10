@@ -39,15 +39,17 @@ joystick_value_t* joystick_task(void)
 {
 	adc_read(channels_, adc_values_, channel_num_);
 	for (size_t i = 0; i < channel_num_; ++i) {
-		joystick_values_[i].ready_ = false;
 
-		volatile int32_t	nv = adc_values_[i].value_;
-		volatile int32_t	ov = adc_old_values_[i].value_;
-		if (((nv - ov > delta_) && (nv > ov)) || ((ov - nv > delta_) && (ov > nv))) {
+		uint32_t	nv = adc_values_[i].value_;
+		uint32_t	ov = adc_old_values_[i].value_;
+		if ((nv > ov + delta_) || (nv < ov - delta_)) {
 			adc_old_values_ [i].value_ = nv;
 			joystick_values_[i].value_ = nv;
 			joystick_values_[i].ready_ = true;
 		}
+		else
+			joystick_values_[i].ready_ = false;
+
 	}
 	return joystick_values_;
 }
