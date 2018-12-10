@@ -1,9 +1,9 @@
-#include <gpio-def.h>
 #include <stdlib.h>
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "encoder-hal.h"
 #include "gpio-driver.h"
+#include "gpio-def.h"
 
 typedef enum encoder_event {
     encoder_event_pinA_up,
@@ -24,25 +24,31 @@ static void determine_state(uint32_t, uint32_t, encoder_data_t*, encoder_state_t
 static void reset_encoder(encoder_data_t*);
 
 static encoder_hal_struct_t    encoders_[] = {
-	{
-		.id_ 	= 0,
-		.pinA_  = P0_6,
-		.pinB_  = P1_7
-	}
+	{ .id_ = 0, .pinA_ = P0_18, .pinB_ = P0_19 },	// encoder of joystick
+	{ .id_ = 1, .pinA_ = P0_26, .pinB_ = P0_27 },	// encoder 1
+	{ .id_ = 2, .pinA_ = P0_31, .pinB_ = P1_0  },
+	{ .id_ = 3, .pinA_ = P1_3 , .pinB_ = P1_4  },
+	{ .id_ = 4, .pinA_ = P1_7 , .pinB_ = P1_8  },
+	{ .id_ = 5, .pinA_ = P1_11, .pinB_ = P1_14 },
+	{ .id_ = 6, .pinA_ = P1_17, .pinB_ = P1_18 }	// encoder 6
 };
-static encoder_data_t         enc_data_[] = {
-	{
-			.valueA_		= 1,
-			.valueB_		= 1,
-			.expected_path_ = -1,
-			.current_step_  = -1
-	}
+static encoder_data_t         enc_data_[sizeof encoders_ / sizeof encoders_[0]] = {
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 },
+	{ .valueA_	= 1, .valueB_ = 1, .expected_path_ = -1, .current_step_  = -1 }
 };
-static encoder_state_t         enc_state_[] = {
-	{
-			.id_		= 0,
-			.result_	= encoder_result_none
-	}
+static encoder_state_t         enc_state_[sizeof encoders_ / sizeof encoders_[0]] = {
+	{ .id_		= 0, .result_	= encoder_result_none },
+	{ .id_		= 1, .result_	= encoder_result_none },
+	{ .id_		= 2, .result_	= encoder_result_none },
+	{ .id_		= 3, .result_	= encoder_result_none },
+	{ .id_		= 4, .result_	= encoder_result_none },
+	{ .id_		= 5, .result_	= encoder_result_none },
+	{ .id_		= 6, .result_	= encoder_result_none },
 };
 static size_t                  enc_num_ = sizeof encoders_ / sizeof encoders_[0];
 

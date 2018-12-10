@@ -5,7 +5,7 @@
  *      Author: Edward
  */
 
-#include <gpio-def.h>
+#include "gpio-def.h"
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_mrt.h"
@@ -22,10 +22,12 @@ typedef struct button_struct {
 }	button_struct_t;
 
 static button_struct_t	buttons[] = {
-	{
-		.pin_ 		= P1_19,
-		.pin_value_ = 1
-	}
+	{ .pin_ = P0_28, .pin_value_ = 1 },	// encoder's button 1
+	{ .pin_ = P1_1 , .pin_value_ = 1 },
+	{ .pin_ = P1_5 , .pin_value_ = 1 },
+	{ .pin_ = P1_9 , .pin_value_ = 1 },
+	{ .pin_ = P1_15, .pin_value_ = 1 },
+	{ .pin_ = P1_19, .pin_value_ = 1 },	// encoder's button 6
 };
 
 size_t button_init(void)

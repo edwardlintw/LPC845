@@ -1,5 +1,8 @@
-#ifndef JOYSTICK_HAL_H_
-#define JOYSTICK_HAL_H_
+#ifndef JOYSTICK_ADC_HAL_H_
+#define JOYSTICK_ADC_HAL_H_
+
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct joystick_value_t {
     uint32_t        value_;
@@ -10,4 +13,4 @@ size_t            joystick_init(void);
 joystick_value_t* joystick_task(void);
 
 
-#endif /* JOYSTICK_HAL_H_ */
+#endif /* JOYSTICK_ADC_HAL_H_ */

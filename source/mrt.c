@@ -1,3 +1,4 @@
+#include <joystick-adc-hal.h>
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_mrt.h"
@@ -9,7 +10,7 @@
 #include "pin_mux.h"
 #include "encoder-hal.h"
 #include "button-hal.h"
-#include "joystick-hal.h"
+#include "led-hal.h"
 #include "time_tick.h"
 
 #define MRT_CLK_FREQ CLOCK_GetFreq(kCLOCK_CoreSysClk)
@@ -17,6 +18,7 @@ static volatile uint32_t mrtIsrCount = 0;
 static uint32_t			 encoders_num = 0;
 static uint32_t			 buttons_num = 0;
 static uint32_t			 joysticks_num = 0;
+static uint32_t			 led_num = 0;
 
 void MRT0_IRQHandler(void)
 {
@@ -77,6 +79,7 @@ int main(void)
     joysticks_num = joystick_init();
     encoders_num  = encoder_init();
     buttons_num   = button_init();
+    led_num       = led_init();
 
     EnableIRQ(MRT0_IRQn);
 

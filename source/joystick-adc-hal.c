@@ -4,12 +4,12 @@
 #include "fsl_mrt.h"
 #include "pin_mux.h"
 #include "adc-driver.h"
-#include "joystick-hal.h"
+#include "joystick-adc-hal.h"
 
 static uint32_t				delta_ = 5U;
 static adc_channel_t  		channels_[] =
 	{
-		{ .channel_ = 0 }
+		{ .channel_ = 0 }	// pin 45, PIO0_7/ADC_0
 	};
 static adc_value_t 			adc_values_[] =
 	{
