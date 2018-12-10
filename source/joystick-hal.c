@@ -43,7 +43,7 @@ joystick_value_t* joystick_task(void)
 
 		volatile int32_t	nv = adc_values_[i].value_;
 		volatile int32_t	ov = adc_old_values_[i].value_;
-		if ((nv - ov > delta_) || (ov - nv > delta_)) {
+		if (((nv - ov > delta_) && (nv > ov)) || ((ov - nv > delta_) && (ov > nv))) {
 			adc_old_values_ [i].value_ = nv;
 			joystick_values_[i].value_ = nv;
 			joystick_values_[i].ready_ = true;

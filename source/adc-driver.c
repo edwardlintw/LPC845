@@ -18,7 +18,7 @@ static bool 				adc_did_init_ = false;
 #define ADC_CLOCK_SOURCE 	kCLOCK_Fro
 
 
-static void adc_pin_config(uint32_t pin);
+static void adc_pin_config(uint32_t pin, swm_select_fixed_pin_t sel);
 
 void adc_init(adc_sample_bit_t sample_bit)
 {
@@ -115,8 +115,7 @@ void adc_channels_init(adc_channel_t* channel, size_t n)
 	uint32_t	chn;
 	for (size_t i = 0; i < n; ++i) {
 		chn = channel[i].channel_;
-		adc_pin_config(chn_pin[chn]);
-	    SWM_SetFixedPinSelect(SWM0, chn_config[chn], true);	// fsl_swm_connections.h
+		adc_pin_config(chn_pin[chn], chn_config[chn]);
 		mask |= (1U << channel[i].channel_);
 	}
 
@@ -154,11 +153,15 @@ void adc_read(adc_channel_t* channel, adc_value_t* value, size_t n)
 	}
 }
 
-static void adc_pin_config(uint32_t pin)
+static void adc_pin_config(uint32_t pin, swm_select_fixed_pin_t sel)
 {
+
 	/*
 	 * fsl_iocon.h
 	 */
+    CLOCK_EnableClock(kCLOCK_Iocon);
+    CLOCK_EnableClock(kCLOCK_Swm);
+
     const uint32_t pin_config = (/* Selects pull-up function */
                                    IOCON_PIO_MODE_PULLUP |
                                    /* Enable hysteresis */
@@ -173,4 +176,9 @@ static void adc_pin_config(uint32_t pin)
                                    IOCON_PIO_CLKDIV0);
 
     IOCON_PinMuxSet(IOCON, pin, pin_config);
+
+    SWM_SetFixedPinSelect(SWM0, sel, true);	// fsl_swm_connections.h
+
+    CLOCK_DisableClock(kCLOCK_Swm);
+
 }
